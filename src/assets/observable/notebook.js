@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/fco-demo@631
+// https://observablehq.com/@churtado/fco-demo@641
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -74,7 +74,7 @@ vega({
     barSelection: {fields: ["weather"], on: "click", type: "multi"}
   },
   encoding: {
-    x: {field: "weather", type: "nominal"},
+    x: { field: "weather", type: "nominal", sort: {op: "count", order: "descending"} },
     y: {aggregate: "count", field: "*", "type": "quantitative"}
   }
 })
