@@ -12,7 +12,8 @@ export class Viz1Component implements OnInit, AfterContentInit {
   // http://localhost:4200/observablehq/barchart
 
   selection: any = [];
-  
+  observer: any = {}
+
   constructor() { }
 
   ngOnInit() {
@@ -21,6 +22,7 @@ export class Viz1Component implements OnInit, AfterContentInit {
   ngAfterContentInit() {
 
     new Runtime().module(notebook, name => {
+      const node = document.getElementById("popupview");
       switch (name) {
         case "viewof popslider3": return new Inspector(document.querySelector("#popslider3"));
         case "viewof popslider4": return new Inspector(document.querySelector("#popslider4"));
@@ -29,11 +31,19 @@ export class Viz1Component implements OnInit, AfterContentInit {
         case "viewof popupView": return new Inspector(document.querySelector("#popupview"));
         case "selection": return {
           pending() { console.log(`${name} is running…`); },
-          fulfilled(value) { console.log(name, value); },
+          fulfilled(value) { 
+            if(value.length === 0) {
+              node.style.display="none";
+            } else {
+              node.style.display="block";
+            }
+            console.log(name, value); 
+          },
           rejected(error) { console.error(error); }
         };
       }
     });
+
 
   }
 

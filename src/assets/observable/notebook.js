@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/fco-demo@518
+// https://observablehq.com/@churtado/fco-demo@631
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -63,16 +63,19 @@ md`# FCO Demo`
   return vl.hconcat(bar,stackedBar).render();
 }
 );
-  main.variable(observer("viewof weatherSelect")).define("viewof weatherSelect", ["embed","weather"], function(embed,weather){return(
-embed({
-  data: {values: weather},
+  main.variable(observer("viewof weatherSelect")).define("viewof weatherSelect", ["vega","weather"], function(vega,weather){return(
+vega({
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  description: "A simple bar chart with embedded data.",
+  width: 360,
+  data: { values: weather },
   mark: "bar",
   selection: {
     barSelection: {fields: ["weather"], on: "click", type: "multi"}
   },
   encoding: {
     x: {field: "weather", type: "nominal"},
-    y: {aggregate: "count", field: "*", type: "quantitative"}
+    y: {aggregate: "count", field: "*", "type": "quantitative"}
   }
 })
 )});
@@ -95,8 +98,10 @@ Generators.observe(notify => {
  }
 }
 );
-  main.variable(observer("viewof popupView")).define("viewof popupView", ["embed","weather","selection"], function(embed,weather,selection){return(
-embed({
+  main.variable(observer("viewof popupView")).define("viewof popupView", ["vega","weather","selection"], function(vega,weather,selection){return(
+vega({
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  width: 360,
   data: {values: weather},
   mark: "area",
   transform: [
@@ -286,5 +291,19 @@ require("https://d3js.org/d3.v5.js")
   main.variable(observer("weather")).define("weather", ["d3"], function(d3){return(
 d3.csv("https://raw.githubusercontent.com/vega/vega/master/docs/data/seattle-weather.csv")
 )});
+  main.variable(observer("vega")).define("vega", ["require"], async function(require)
+{
+  const v = window.vega = await require("vega@3");
+  const vl = window.vl = await require("vega-lite@2");
+  const ve = await require("vega-embed@3");
+  async function vega(spec, options) {
+    const div = document.createElement("div");
+    div.value = (await ve(div, spec, options)).view;
+    return div;
+  }
+  vega.changeset = v.changeset;
+  return vega;
+}
+);
   return main;
 }
