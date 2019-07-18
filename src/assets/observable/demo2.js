@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/tableau-0-6-7@3479
+// https://observablehq.com/@churtado/tableau-0-6-7@3517
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -170,45 +170,6 @@ vega({
 })
 )});
   main.variable(observer("linechart")).define("linechart", ["Generators", "viewof linechart"], (G, _) => G.input(_));
-  main.variable(observer("viewof map")).define("viewof map", ["vega","state_group_view"], function(vega,state_group_view){return(
-vega({
-  "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
-  "description": "Line drawn between airports in the U.S. simulating a flight itinerary",
-  "width": 200,
-  "height": 200,
-  "data": {
-    "url": "https://raw.githubusercontent.com/churtado/vega-datasets/gh-pages/data/us-10m.json",
-    "format": {
-      "type": "topojson",
-      "feature": "states"
-    }
-  },
-  "transform": [{
-    "lookup": "id",
-    "from": {
-      "data": {
-        "values": state_group_view 
-      },
-      "key": "state_id",
-      "fields": ["profit"]
-    }
-  }],
-  "selection": {
-    "state": {"type": "multi", "fields": ["id"]}
-  },
-  "projection": {
-    "type": "albersUsa"
-  },
-  "mark":"geoshape",
-  "encoding": {
-    "color": {
-      "field": "profit",
-      "type": "quantitative"
-    }
-  }
-})
-)});
-  main.variable(observer("map")).define("map", ["Generators", "viewof map"], (G, _) => G.input(_));
   main.variable(observer("viewof barchart")).define("viewof barchart", ["vega","cat_subcat_region_view"], function(vega,cat_subcat_region_view){return(
 vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
@@ -343,6 +304,45 @@ vega({
 })
 )});
   main.variable(observer("barchart")).define("barchart", ["Generators", "viewof barchart"], (G, _) => G.input(_));
+  main.variable(observer("viewof map")).define("viewof map", ["vega","state_group_view"], function(vega,state_group_view){return(
+vega({
+  "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
+  "description": "Line drawn between airports in the U.S. simulating a flight itinerary",
+  "width": 200,
+  "height": 200,
+  "data": {
+    "url": "https://raw.githubusercontent.com/churtado/vega-datasets/gh-pages/data/us-10m.json",
+    "format": {
+      "type": "topojson",
+      "feature": "states"
+    }
+  },
+  "transform": [{
+    "lookup": "id",
+    "from": {
+      "data": {
+        "values": state_group_view 
+      },
+      "key": "state_id",
+      "fields": ["profit"]
+    }
+  }],
+  "selection": {
+    "state": {"type": "multi", "fields": ["id"]}
+  },
+  "projection": {
+    "type": "albersUsa"
+  },
+  "mark":"geoshape",
+  "encoding": {
+    "color": {
+      "field": "profit",
+      "type": "quantitative"
+    }
+  }
+})
+)});
+  main.variable(observer("map")).define("map", ["Generators", "viewof map"], (G, _) => G.input(_));
   main.variable(observer()).define(["md"], function(md){return(
 md`## Signals`
 )});
@@ -460,7 +460,7 @@ Generators.observe(notify => {
              e.profit > value.profit[0] && e.profit < value.profit[1]
       }
     }).map(e =>{
-      return e["Customer ID"]
+      return e["customer_id"]
     });
     
     notify(value);
@@ -478,7 +478,6 @@ md`### Line`
 Generators.observe(notify => {
   // Yield the input’s initial value.
   const lineSelection = (name, value) => {
-    debugger;
     if(value.order_date == undefined){
       $0.value = []
     }else {
@@ -495,19 +494,6 @@ Generators.observe(notify => {
   main.variable(observer()).define(["md"], function(md){return(
 md`## Selections`
 )});
-  main.define("initial filterState", function()
-{
-  return {
-    selected_categories: [],
-    selected_subcategories: [],
-    selected_regions: [],
-    selected_customer_ids: [],
-    selected_states: []
-  }
-}
-);
-  main.variable(observer("mutable filterState")).define("mutable filterState", ["Mutable", "initial filterState"], (M, _) => new M(_));
-  main.variable(observer("filterState")).define("filterState", ["mutable filterState"], _ => _.generator);
   main.variable(observer()).define(["md"], function(md){return(
 md`#### Subcategories`
 )});
@@ -636,6 +622,12 @@ require("https://d3js.org/d3.v5.js")
   return vega;
 }
 );
+  main.variable(observer("crossfilter")).define("crossfilter", ["require"], function(require){return(
+require('https://bundle.run/crossfilter2@1.4.5')
+)});
+  main.variable(observer("moment")).define("moment", ["require"], function(require){return(
+require('https://bundle.run/moment-timezone@0.5.14')
+)});
   main.variable(observer()).define(["md"], function(md){return(
 md`## Input`
 )});
@@ -844,15 +836,6 @@ function createSlider(config = {}) {
 }
 )});
   main.variable(observer()).define(["md"], function(md){return(
-md`## Multidimensional data`
-)});
-  main.variable(observer("crossfilter")).define("crossfilter", ["require"], function(require){return(
-require('https://bundle.run/crossfilter2@1.4.5')
-)});
-  main.variable(observer("moment")).define("moment", ["require"], function(require){return(
-require('https://bundle.run/moment-timezone@0.5.14')
-)});
-  main.variable(observer()).define(["md"], function(md){return(
 md`# Raw Data`
 )});
   main.variable(observer()).define(["md"], function(md){return(
@@ -898,41 +881,6 @@ Math.random()
 )});
   main.variable(observer()).define(["md"], function(md){return(
 md`## Crossfilter`
-)});
-  main.variable(observer("filterGroupByDimensions")).define("filterGroupByDimensions", ["dataStructure","updateRandomVar"], function(dataStructure,updateRandomVar){return(
-(groupkey, dimensionMapArray, reducers, mapper) => {
-  debugger;
-  
-  dimensionMapArray.forEach(e => {
-    let dimension = dataStructure.dimensions[e.key];
-    let values = e.value;
-    
-    if( e.filterFunction == undefined) {
-      // filter the dimension
-      dimension.filterFunction( (f)=> {
-        if(values.length > 0){
-          return values.indexOf(f) >= 0
-        } else {
-          return true;
-        }
-      });
-    } else {
-      dimension.filterFunction(e.filterFunction);
-    }
-  });
-  
-   // generate new group and reduce
-  let group = dataStructure.groups[groupkey];
-  
-  let result = group.reduce(reducers.reduceAdd, reducers.reduceRemove, reducers.reduceInitial).all()
-    .map(mapper).slice()
-  
-  updateRandomVar();
-  return result;
-}
-)});
-  main.variable(observer()).define(["md"], function(md){return(
-md`# Data`
 )});
   main.variable(observer("createCrossfilter")).define("createCrossfilter", ["log","ss","crossfilter"], function(log,ss,crossfilter){return(
 async (fullDimensions) => {
@@ -981,6 +929,41 @@ async (fullDimensions) => {
   main.variable(observer("dataStructure")).define("dataStructure", ["createCrossfilter"], function(createCrossfilter){return(
 createCrossfilter(false)
 )});
+  main.variable(observer("filterGroupByDimensions")).define("filterGroupByDimensions", ["dataStructure","updateRandomVar"], function(dataStructure,updateRandomVar){return(
+(groupkey, dimensionMapArray, reducers, mapper) => {
+  debugger;
+  
+  dimensionMapArray.forEach(e => {
+    let dimension = dataStructure.dimensions[e.key];
+    let values = e.value;
+    
+    if( e.filterFunction == undefined) {
+      // filter the dimension
+      dimension.filterFunction( (f)=> {
+        if(values.length > 0){
+          return values.indexOf(f) >= 0
+        } else {
+          return true;
+        }
+      });
+    } else {
+      dimension.filterFunction(e.filterFunction);
+    }
+  });
+  
+   // generate new group and reduce
+  let group = dataStructure.groups[groupkey];
+  
+  let result = group.reduce(reducers.reduceAdd, reducers.reduceRemove, reducers.reduceInitial).all()
+    .map(mapper).slice()
+  
+  updateRandomVar();
+  return result;
+}
+)});
+  main.variable(observer()).define(["md"], function(md){return(
+md`# Data`
+)});
   main.variable(observer("cat_subcat_region_view")).define("cat_subcat_region_view", ["filterGroupByDimensions","selected_customers_left","selected_dates"], function(filterGroupByDimensions,selected_customers_left,selected_dates){return(
 filterGroupByDimensions ("cat_subcat_region_dimension", 
   [
@@ -991,7 +974,6 @@ filterGroupByDimensions ("cat_subcat_region_dimension",
      filterFunction: (f) => {
        let range_dates = selected_dates.slice();
        if(range_dates.length > 0) {
-         debugger;
          return (f >= range_dates[0] && f <= range_dates[1]);
        } else {
          return true;
@@ -1006,7 +988,7 @@ filterGroupByDimensions ("cat_subcat_region_dimension",
       };
     },
     reduceRemove: (p, v) => {
-      return {sales: p.sales - v.Sales, profit: p.profit - v.profit };
+      return {sales: p.sales - v.sales, profit: p.profit - v.profit };
     },
     reduceInitial: () =>  {
       return {sales: 0, profit: 0};
@@ -1147,44 +1129,5 @@ filterGroupByDimensions ("order_date",
   }
 )
 )});
-  main.variable(observer("filterStack")).define("filterStack", function()
-{
-  class Stack {
-    constructor() {
-      this.items = [];
-      this.count = 0;
-    }
-
-    getLength() {
-      return this.count;
-    }
-
-    push(item) {
-      this.items.push(item);
-      this.count = this.count + 1;
-    }
-
-    pop() {
-      if(this.count > 0) {
-        this.count = this.count - 1;
-      }
-
-      return this.items.pop();
-    }
-
-    peek() {
-      return this.items.slice(-1)[0];
-    }
-
-    print() {
-      console.log(this.items);
-    }
-  }
-  let stack = new Stack();
-  stack.push("bar");
-  return stack;
-  
-}
-);
   return main;
 }
