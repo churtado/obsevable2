@@ -1,8 +1,8 @@
-// https://observablehq.com/@churtado/tableau-0-6-4@3430
+// https://observablehq.com/@churtado/tableau-0-6-7@3475
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
-md`# Tableau 0.6.4`
+md`# Tableau 0.6.7`
 )});
   main.variable(observer()).define(["md"], function(md){return(
 md`# Charts`
@@ -85,8 +85,6 @@ vega({
           }
         }
     },
-    
-    
     {
       "width": 360,
       "height": 400,
@@ -863,13 +861,8 @@ md`## Superstore`
   main.variable(observer("superstore")).define("superstore", ["d3"], function(d3){return(
 d3.json("https://raw.githubusercontent.com/churtado/superjson/master/superstore.json")
 )});
-  main.variable(observer("superstore_time")).define("superstore_time", ["superstore","renameProp","addStateId","moment"], function(superstore,renameProp,addStateId,moment){return(
-superstore.map(e => renameProp("Order Date", "OrderDate", e))
-.map( e => addStateId(e))
-.map(e =>{ 
-  e.OrderDateUnix = moment(e.OrderDate).unix()*1000
-  return e;
-})
+  main.variable(observer("ss")).define("ss", ["superstore"], function(superstore){return(
+superstore
 )});
   main.variable(observer()).define(["md"], function(md){return(
 md`## Mapping`
@@ -891,35 +884,6 @@ function log(args) {
 }
 )});
   main.variable(observer()).define(["md"], function(md){return(
-md`## ETL`
-)});
-  main.variable(observer("renameProp")).define("renameProp", function(){return(
-(
-  oldProp,
-  newProp,
-  { [oldProp]: old, ...others }
-) => {
-  return {
-    [newProp]: old,
-    ...others
-  };
-}
-)});
-  main.variable(observer("addStateId")).define("addStateId", ["tsv_state_names"], function(tsv_state_names){return(
-(
-  { "State": state, ...others }
-) => {
-  let s = tsv_state_names.filter(tsv_state => {
-    return state == tsv_state.name
-  })
-  return {
-    "State": state,
-    "state_id": s[0].id,
-    ...others
-  };
-}
-)});
-  main.variable(observer()).define(["md"], function(md){return(
 md`## Crossfilter Hack`
 )});
   main.define("initial randomVar", function(){return(
@@ -935,53 +899,9 @@ Math.random()
   main.variable(observer()).define(["md"], function(md){return(
 md`## Crossfilter`
 )});
-  main.variable(observer("createCrossfilter")).define("createCrossfilter", ["log","superstore_time","crossfilter"], function(log,superstore_time,crossfilter){return(
-async (fullDimensions) => {
-  log('Loading data.');
-  const data = superstore_time;
-  const subsetDimensions = [
-    "Customer ID",
-    "state_id",
-    "State",
-    "Category",
-    "Sub-Category",
-    "Region",
-    "Segment",
-    "OrderDate",
-    "OrderDateUnix"
-  ];
-  
-  const dimensionList = fullDimensions ? Object.keys(data[0]) : subsetDimensions;
-  
-  const dateFormat = 'MM/DD/YYYY';
-  
-  const superstore = crossfilter(data);
-  
-  log('Crossfilter c reated, setting up dimensions and groups.');
-  const dimensions = {}
-  const groups = {}
-  dimensionList.forEach((dimension) => {
-    dimensions[dimension] = superstore.dimension((d) => { return d[dimension] });
-    groups[dimension] = dimensions[dimension].group();
-  });
-  
-  dimensions["cat_subcat_region_dimension"] = superstore.dimension(function(d) { 
-    return JSON.stringify ( { category: d.Category , subcategory: d["Sub-Category"], region: d.Region } ) ;
-  });
-  groups["cat_subcat_region_dimension"] = dimensions["cat_subcat_region_dimension"].group();
-  
-  log('Crossfilter and setup finished.');
-  
-  return {
-    superstore: superstore,
-    dimensions: dimensions,
-    dimensionList: dimensionList,
-    groups: groups
-  };
-}
-)});
   main.variable(observer("filterGroupByDimensions")).define("filterGroupByDimensions", ["dataStructure","updateRandomVar"], function(dataStructure,updateRandomVar){return(
 (groupkey, dimensionMapArray, reducers, mapper) => {
+  debugger;
   
   dimensionMapArray.forEach(e => {
     let dimension = dataStructure.dimensions[e.key];
@@ -1014,6 +934,50 @@ async (fullDimensions) => {
   main.variable(observer()).define(["md"], function(md){return(
 md`# Data`
 )});
+  main.variable(observer("createCrossfilter")).define("createCrossfilter", ["log","ss","crossfilter"], function(log,ss,crossfilter){return(
+async (fullDimensions) => {
+  log('Loading data.');
+  const data = ss;
+  const subsetDimensions = [
+    "customer_id",
+    "state_id",
+    "state",
+    "category",
+    "subcategory",
+    "region",
+    "segment",
+    "order_date",
+  ];
+  
+  const dimensionList = fullDimensions ? Object.keys(data[0]) : subsetDimensions;
+  
+  const dateFormat = 'MM/DD/YYYY';
+  
+  const superstore = crossfilter(data);
+  
+  log('Crossfilter c reated, setting up dimensions and groups.');
+  const dimensions = {}
+  const groups = {}
+  dimensionList.forEach((dimension) => {
+    dimensions[dimension] = superstore.dimension((d) => { return d[dimension] });
+    groups[dimension] = dimensions[dimension].group();
+  });
+  
+  dimensions["cat_subcat_region_dimension"] = superstore.dimension(function(d) { 
+    return JSON.stringify ( { category: d.category , subcategory: d.subcategory, region: d.region } ) ;
+  });
+  groups["cat_subcat_region_dimension"] = dimensions["cat_subcat_region_dimension"].group();
+  
+  log('Crossfilter and setup finished.');
+  
+  return {
+    superstore: superstore,
+    dimensions: dimensions,
+    dimensionList: dimensionList,
+    groups: groups
+  };
+}
+)});
   main.variable(observer("dataStructure")).define("dataStructure", ["createCrossfilter"], function(createCrossfilter){return(
 createCrossfilter(false)
 )});
@@ -1021,8 +985,8 @@ createCrossfilter(false)
 filterGroupByDimensions ("cat_subcat_region_dimension", 
   [
     //{key: "State", value: selected_states.slice()},
-    {key: "Customer ID", value: selected_customers_left.slice()},
-    {key: "OrderDateUnix", 
+    {key: "customer_id", value: selected_customers_left.slice()},
+    {key: "order_date", 
      value: selected_dates.slice(), 
      filterFunction: (f) => {
        let range_dates = selected_dates.slice();
@@ -1038,11 +1002,11 @@ filterGroupByDimensions ("cat_subcat_region_dimension",
   {
     reduceAdd: (p, v) => {
       return {
-        sales: p.sales + v.Sales, profit: p.profit + v.Profit 
+        sales: p.sales + v.sales, profit: p.profit + v.profit 
       };
     },
     reduceRemove: (p, v) => {
-      return {sales: p.sales - v.Sales, profit: p.profit - v.Profit };
+      return {sales: p.sales - v.Sales, profit: p.profit - v.profit };
     },
     reduceInitial: () =>  {
       return {sales: 0, profit: 0};
@@ -1055,7 +1019,7 @@ filterGroupByDimensions ("cat_subcat_region_dimension",
 )
 )});
   main.variable(observer("customer_id_group_view_left")).define("customer_id_group_view_left", ["filterGroupByDimensions"], function(filterGroupByDimensions){return(
-filterGroupByDimensions ("Customer ID", 
+filterGroupByDimensions ("customer_id", 
   [
     /*{key: "State", value: selected_states.slice()},
     {key: "Category", value: selected_categories.slice()},
@@ -1065,28 +1029,28 @@ filterGroupByDimensions ("Customer ID",
   {
     reduceAdd: (p, v) => {
       return {
-        sales: p.sales + v.Sales, profit: p.profit + v.Profit 
+        sales: p.sales + v.sales, profit: p.profit + v.profit 
       };
     },
     reduceRemove: (p, v) => {
-      return {sales: p.sales - v.Sales, profit: p.profit - v.Profit };
+      return {sales: p.sales - v.sales, profit: p.profit - v.profit };
     },
     reduceInitial: () =>  {
       return {sales: 0, profit: 0};
     }
   },
   ({key: k, value: {sales: s, profit: p} }) => {
-    return {"Customer ID": k, sales: s, profit: p};
+    return {"customer_id": k, sales: s, profit: p};
   })
 )});
   main.variable(observer("customer_id_group_view_right")).define("customer_id_group_view_right", ["filterGroupByDimensions","selected_states","selected_categories","selected_subcategories","selected_regions","selected_dates"], function(filterGroupByDimensions,selected_states,selected_categories,selected_subcategories,selected_regions,selected_dates){return(
-filterGroupByDimensions ("Customer ID", 
+filterGroupByDimensions ("customer_id", 
   [
-    {key: "State", value: selected_states.slice()},
-    {key: "Category", value: selected_categories.slice()},
-    {key: "Sub-Category", value: selected_subcategories.slice()},
-    {key: "Region", value: selected_regions.slice()},
-    {key: "OrderDateUnix", 
+    {key: "state", value: selected_states.slice()},
+    {key: "category", value: selected_categories.slice()},
+    {key: "subcategory", value: selected_subcategories.slice()},
+    {key: "region", value: selected_regions.slice()},
+    {key: "order_date", 
          value: selected_dates.slice(), 
          filterFunction: (f) => {
            let range_dates = selected_dates.slice();
@@ -1102,11 +1066,11 @@ filterGroupByDimensions ("Customer ID",
   {
     reduceAdd: (p, v) => {
       return {
-        sales: p.sales + v.Sales, profit: p.profit + v.Profit 
+        sales: p.sales + v.sales, profit: p.profit + v.profit 
       };
     },
     reduceRemove: (p, v) => {
-      return {sales: p.sales - v.Sales, profit: p.profit - v.Profit };
+      return {sales: p.sales - v.sales, profit: p.profit - v.profit };
     },
     reduceInitial: () =>  {
       return {sales: 0, profit: 0};
@@ -1117,14 +1081,14 @@ filterGroupByDimensions ("Customer ID",
   })
 )});
   main.variable(observer("state_group_view")).define("state_group_view", ["filterGroupByDimensions","selected_categories","selected_subcategories","selected_regions","selected_dates","tsv_state_names"], function(filterGroupByDimensions,selected_categories,selected_subcategories,selected_regions,selected_dates,tsv_state_names){return(
-filterGroupByDimensions ("State", 
+filterGroupByDimensions ("state", 
   [
-    {key: "Segment", value: []},
+    {key: "segment", value: []},
     //{key: "Customer ID", value: selected_customers_left.slice()},
-    {key: "Category", value: selected_categories.slice()},
-    {key: "Sub-Category", value: selected_subcategories.slice()},
-    {key: "Region", value: selected_regions.slice()},
-    {key: "OrderDateUnix", 
+    {key: "category", value: selected_categories.slice()},
+    {key: "subcategory", value: selected_subcategories.slice()},
+    {key: "region", value: selected_regions.slice()},
+    {key: "order_date", 
        value: selected_dates.slice(), 
        filterFunction: (f) => {
          let range_dates = selected_dates.slice();
@@ -1140,11 +1104,11 @@ filterGroupByDimensions ("State",
   {
     reduceAdd: (p, v) => {
       return {
-        sales: p.sales + v.Sales, profit: p.profit + v.Profit 
+        sales: p.sales + v.sales, profit: p.profit + v.profit 
       };
     },
     reduceRemove: (p, v) => {
-      return {sales: p.sales - v.Sales, profit: p.profit - v.Profit };
+      return {sales: p.sales - v.sales, profit: p.profit - v.profit };
     },
     reduceInitial: () =>  {
       return {sales: 0, profit: 0};
@@ -1163,16 +1127,16 @@ filterGroupByDimensions ("State",
 })
 )});
   main.variable(observer("order_date_group_view")).define("order_date_group_view", ["filterGroupByDimensions","moment"], function(filterGroupByDimensions,moment){return(
-filterGroupByDimensions ("OrderDate", 
+filterGroupByDimensions ("order_date", 
   [  ],
   {
     reduceAdd: (p, v) => {
       return {
-        sales: p.sales + v.Sales, profit: p.profit + v.Profit 
+        sales: p.sales + v.sales, profit: p.profit + v.profit 
       };
     },
     reduceRemove: (p, v) => {
-      return {sales: p.sales - v.Sales, profit: p.profit - v.Profit };
+      return {sales: p.sales - v.sales, profit: p.profit - v.profit };
     },
     reduceInitial: () =>  {
       return {sales: 0, profit: 0};

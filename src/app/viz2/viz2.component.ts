@@ -10,7 +10,7 @@ import notebook from '../../assets/observable/demo2';
 export class Viz2Component implements OnInit, AfterContentInit {
 
   selection: any = [];
-  observer: any = {}
+  observer: any = {};
 
   constructor() { }
 
@@ -20,25 +20,13 @@ export class Viz2Component implements OnInit, AfterContentInit {
   ngAfterContentInit() {
 
     new Runtime().module(notebook, name => {
-      const node = document.getElementById("popupview");
       switch (name) {
-        case "viewof popslider3": return new Inspector(document.querySelector("#popslider3"));
-        case "viewof popslider4": return new Inspector(document.querySelector("#popslider4"));
-        case "facet1": return new Inspector(document.querySelector("#facet1"));
-        case "viewof weatherSelect": return new Inspector(document.querySelector("#weatherSelect"));
-        case "viewof popupView": return new Inspector(document.querySelector("#popupview"));
-        case "selection": return {
-          pending() { console.log(`${name} is running…`); },
-          fulfilled(value) { 
-            if(value.length === 0) {
-              node.style.display="none";
-            } else {
-              node.style.display="block";
-            }
-            console.log(name, value); 
-          },
-          rejected(error) { console.error(error); }
-        };
+        case 'viewof sales_slider': return new Inspector(document.querySelector("#sales_slider"));
+        case "viewof profit_slider": return new Inspector(document.querySelector("#profit_slider"));
+        case "viewof map": return new Inspector(document.querySelector("#map"));
+        case "viewof barchart": return new Inspector(document.querySelector("#barchart"));
+        case "viewof scatterplot": return new Inspector(document.querySelector("#scatterplot"));
+        case "viewof linechart": return new Inspector(document.querySelector("#linechart"));
       }
     });
   }
