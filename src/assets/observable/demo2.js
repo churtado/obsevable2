@@ -1,7 +1,4 @@
-// https://observablehq.com/@churtado/tableau-0-6-4@3408
-import define1 from "../@pheel/range-slider.js?v=3";
-import define2 from "../@jashkenas/inputs.js?v=3";
-
+// https://observablehq.com/@churtado/tableau-0-6-4@3430
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -483,6 +480,7 @@ md`### Line`
 Generators.observe(notify => {
   // Yield the input’s initial value.
   const lineSelection = (name, value) => {
+    debugger;
     if(value.order_date == undefined){
       $0.value = []
     }else {
@@ -643,14 +641,210 @@ require("https://d3js.org/d3.v5.js")
   main.variable(observer()).define(["md"], function(md){return(
 md`## Input`
 )});
-  const child1 = runtime.module(define1);
-  main.import("createSlider", child1);
-  main.import("sliderCss", child1);
-  main.variable(observer()).define(["sliderCss"], function(sliderCss){return(
-sliderCss
+  main.variable(observer("sliderCss")).define("sliderCss", ["html"], function(html){return(
+html`
+  <style>
+    .d3slider {
+      position: absolute;
+      background: #bdbdbd;
+      height: 130%;
+      min-width: 5%;
+      top: -15%;
+      cursor: move;
+      border-radius: 8px;
+    }
+
+    .d3slider .handle {
+      position: absolute;
+      height: 100%;
+      width: 6px;
+      border-radius: 3px;
+    }
+
+    .d3slider .EE {
+      right: -3px;
+      cursor: e-resize;
+    }
+
+    .d3slider .WW {
+      cursor: w-resize;
+      left: -3px;
+    }
+
+    .d3slider .EE, .d3slider .WW {
+      top: 50%;
+      margin-top: -10px;
+    }
+
+    .d3slider-box {
+      height: 30px;
+      border-radius: 8px;
+      background-color: #f0f0f0;
+    }
+  </style>
+`
 )});
-  const child2 = runtime.module(define2);
-  main.import("button", child2);
+  main.variable(observer("createSlider")).define("createSlider", ["html","d3"], function(html,d3){return(
+function createSlider(config = {}) {
+
+  let {domain, range, maxWidth, minSliderWidth, height} = config
+  height = height ? height : 20
+  domain = domain ? domain : {min: 0, max: 10}
+  minSliderWidth = minSliderWidth ? minSliderWidth : 10
+  range = range ? range : {
+    min: Math.ceil((domain.max - domain.min) * 0.33) + domain.min,
+    max: Math.ceil((domain.max - domain.min) * 0.66) + domain.min
+  }
+  
+  const sliderOutput = html`
+    <div 
+      style='${maxWidth && 'max-width:' + maxWidth + 'px; '}height:${height}px;'
+    />
+  `
+  let sliderBoxContainer = d3.select(sliderOutput)
+  
+  const sliderBox = 
+    sliderBoxContainer.append('div')
+      .style('position', 'relative')
+      .style('height', (height / 1.3) + 'px')
+      .style('min-width', (minSliderWidth * 2) + 'px')
+      .classed('d3slider-box', true)
+  const slider =
+    sliderBox.append('div')
+      .classed('d3slider', true)
+  const handleW = slider.append('div').classed('handle WW', true)
+  const handleE = slider.append('div').classed('handle EE', true)
+  
+  /** Update the `left` and `width` attributes of `slider` based on `range` */
+  const updateUIFromRange = range => {
+    range.min = Math.max(range.min, domain.min)
+    range.max = Math.min(range.max, domain.max)
+    const conW = sliderBox.node().clientWidth
+    const rangeW = range.max - range.min
+    const slope = (conW - minSliderWidth) / (domain.max - domain.min)
+    const uirangeW = minSliderWidth + rangeW * slope
+    let ratio = (range.min - domain.min) / (domain.max - domain.min - rangeW)
+    if (isNaN(ratio)) { ratio = 0 }
+    const uirangeL = ratio * (conW - uirangeW)
+    slider
+      .style('left', uirangeL + 'px')
+      .style('width', uirangeW + 'px')
+  }
+
+  /** Update the `range` based on the `left` and `width` attributes of `slider` */
+  const updateRangeFromUI = () => {
+    const uirangeL = parseFloat(slider.style('left'))
+    const uirangeW = parseFloat(slider.style('width'))
+    const conW = sliderBox.node().clientWidth
+    const slope = (conW - minSliderWidth) / (domain.max - domain.min)
+    const rangeW = (uirangeW - minSliderWidth) / slope
+    const uislope = (conW === uirangeW) ? 0 :
+      ((domain.max - domain.min - rangeW) / (conW - uirangeW))
+    const rangeL = domain.min + uislope * uirangeL
+    const range = {
+      min: Math.round(rangeL),
+      max: Math.round(rangeL + rangeW)
+    }
+    sliderOutput.value = {domain, range, updateUIFromRange}
+    sliderOutput.dispatchEvent(new CustomEvent('input'))
+  }
+ 
+  const dragResizeE = d3.drag()
+    .on('start', () => {
+      d3.event.sourceEvent.stopPropagation()
+      sliderOutput.dispatchEvent(new CustomEvent('resizeStart'))
+    })
+    .on('end', () => {
+      d3.event.sourceEvent.stopPropagation()
+      sliderOutput.dispatchEvent(new CustomEvent('resizeEnd'))
+    })
+    .on('drag', () => {
+      const dx = d3.event.dx
+      if (dx === 0) return;
+      const conWidth = sliderBox.node().clientWidth
+      const newLeft = parseInt(slider.style('left'))
+      let newWidth = parseFloat(slider.style('width')) + dx
+      newWidth = Math.max(newWidth, minSliderWidth)
+      newWidth = Math.min(newWidth, conWidth - newLeft)
+      slider.style('width', newWidth + 'px')
+      updateRangeFromUI()
+    })
+  handleE.call(dragResizeE)
+
+  let startX
+  const dragResizeW = d3.drag()
+    .on('start', () => {
+      startX = d3.event.x
+      d3.event.sourceEvent.stopPropagation()
+      sliderOutput.dispatchEvent(new CustomEvent('resizeStart'))
+    })
+    .on('end', () => {
+      d3.event.sourceEvent.stopPropagation()
+      sliderOutput.dispatchEvent(new CustomEvent('resizeEnd'))
+    })
+    .on('drag', () => {
+      const dx = d3.event.x - startX
+      if (dx === 0) return;
+      let newLeft = parseFloat(slider.style('left')) + dx
+      let newWidth = parseFloat(slider.style('width')) - dx
+      if (newLeft < 0) { newWidth += newLeft; newLeft = 0 }
+      if (newWidth < minSliderWidth) {
+        newLeft -= minSliderWidth - newWidth
+        newWidth = minSliderWidth
+      }
+      slider.style('left', newLeft + 'px')
+      slider.style('width', newWidth + 'px')
+      updateRangeFromUI()
+    })
+  handleW.call(dragResizeW)
+
+  const dragMove = d3.drag()
+    .on('start', () => {
+      d3.event.sourceEvent.stopPropagation()
+      sliderOutput.dispatchEvent(new CustomEvent('dragStart'))
+    })
+    .on('end', () => {
+      d3.event.sourceEvent.stopPropagation()
+      sliderOutput.dispatchEvent(new CustomEvent('dragEnd'))
+    })
+    .on('drag', () => {
+      const dx = d3.event.dx
+      const conWidth = sliderBox.node().clientWidth
+      let newLeft = parseInt(slider.style('left')) + dx
+      let newWidth = parseInt(slider.style('width'))
+      newLeft = Math.max(newLeft, 0)
+      newLeft = Math.min(newLeft, conWidth - newWidth)
+      slider.style('left', newLeft + 'px')
+      updateRangeFromUI()
+    })
+  slider.call(dragMove)
+
+  sliderBoxContainer.on('mousedown', () => {
+    const x = d3.mouse(sliderBox.node())[0]
+    let props = {}
+    const sliderWidth = parseFloat(slider.style('width'))
+    const conWidth = sliderBox.node().clientWidth
+    props.left = Math.min(conWidth - sliderWidth, Math.max(x - sliderWidth / 2, 0))
+    props.left = Math.round(props.left)
+    props.width = Math.round(props.width)
+    slider.style('left', props.left + 'px')
+      .style('width', props.width + 'px') 
+    updateRangeFromUI()
+    sliderOutput.dispatchEvent(new CustomEvent('dragEnd'))
+  })
+
+  //Reposition slider on window resize
+  window.addEventListener('resize', () => {
+    updateUIFromRange(range)
+  })
+
+  updateUIFromRange(range)
+  sliderOutput.value = {domain, range, updateUIFromRange}
+  sliderOutput.dispatchEvent(new CustomEvent('input'))
+  
+  return sliderOutput  
+}
+)});
   main.variable(observer()).define(["md"], function(md){return(
 md`## Multidimensional data`
 )});
@@ -833,6 +1027,7 @@ filterGroupByDimensions ("cat_subcat_region_dimension",
      filterFunction: (f) => {
        let range_dates = selected_dates.slice();
        if(range_dates.length > 0) {
+         debugger;
          return (f >= range_dates[0] && f <= range_dates[1]);
        } else {
          return true;
@@ -896,6 +1091,7 @@ filterGroupByDimensions ("Customer ID",
          filterFunction: (f) => {
            let range_dates = selected_dates.slice();
            if(range_dates.length > 0) {
+             debugger;
              return (f >= range_dates[0] && f <= range_dates[1]);
            } else {
              return true;
@@ -924,6 +1120,7 @@ filterGroupByDimensions ("Customer ID",
 filterGroupByDimensions ("State", 
   [
     {key: "Segment", value: []},
+    //{key: "Customer ID", value: selected_customers_left.slice()},
     {key: "Category", value: selected_categories.slice()},
     {key: "Sub-Category", value: selected_subcategories.slice()},
     {key: "Region", value: selected_regions.slice()},
@@ -932,6 +1129,7 @@ filterGroupByDimensions ("State",
        filterFunction: (f) => {
          let range_dates = selected_dates.slice();
          if(range_dates.length > 0) {
+           debugger;
            return (f >= range_dates[0] && f <= range_dates[1]);
          } else {
            return true;
