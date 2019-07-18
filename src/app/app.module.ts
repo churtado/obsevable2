@@ -6,11 +6,13 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import { Viz1Component } from './viz1/viz1.component';
 import { AppRoutingModule } from './app-routing.module';
+import { Viz2Component } from './viz2/viz2.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    Viz1Component
+    Viz1Component,
+    Viz2Component
   ],
   imports: [
     BrowserModule,
