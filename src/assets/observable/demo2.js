@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/tableau-0-6-7@3475
+// https://observablehq.com/@churtado/tableau-0-6-7@3479
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -52,8 +52,8 @@ vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json", 
   "hconcat": [
     {
-      "width": 360,
-      "height": 400,
+      "width": 200,
+      "height": 200,
       "data": { "values": customer_id_group_view_left  },
       "selection": {
         "brush_left": { "type": "interval"},
@@ -86,8 +86,8 @@ vega({
         }
     },
     {
-      "width": 360,
-      "height": 400,
+      "width": 200,
+      "height": 200,
       "data": { "values": customer_id_group_view_right  },
       "mark": {"type": "circle", "clip": true},
       //"mark": {"type": "rect", "clip": true},
@@ -174,8 +174,8 @@ vega({
 vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
   "description": "Line drawn between airports in the U.S. simulating a flight itinerary",
-  "width": 600,
-  "height": 400,
+  "width": 200,
+  "height": 200,
   "data": {
     "url": "https://raw.githubusercontent.com/churtado/vega-datasets/gh-pages/data/us-10m.json",
     "format": {

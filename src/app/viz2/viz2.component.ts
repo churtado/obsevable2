@@ -21,11 +21,12 @@ export class Viz2Component implements OnInit, AfterContentInit {
 
     new Runtime().module(notebook, name => {
       switch (name) {
-        case 'viewof sales_slider': return new Inspector(document.querySelector("#sales_slider"));
-        case "viewof profit_slider": return new Inspector(document.querySelector("#profit_slider"));
+        // case 'viewof sales_slider': return new Inspector(document.querySelector("#sales_slider"));
+        // case "viewof profit_slider": return new Inspector(document.querySelector("#profit_slider"));
         case "viewof map": return new Inspector(document.querySelector("#map"));
         case "viewof barchart": return new Inspector(document.querySelector("#barchart"));
         case "viewof scatterplot": return new Inspector(document.querySelector("#scatterplot"));
+        case "viewof linechart": return new Inspector(document.querySelector("#linechart"));
         case "viewof linechart": return new Inspector(document.querySelector("#linechart"));
       }
     });
