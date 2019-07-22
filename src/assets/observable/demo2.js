@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/tableau-0-7-1@4944
+// https://observablehq.com/@churtado/tableau-0-7-1@4948
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -229,7 +229,10 @@ vega({
     {
       "width": 600,
       "height": 300,
-      "mark": "line",
+      "mark": {
+        "type": "line",
+        "point": true
+      },
       "encoding": {
         "x": {
           "field": "order_date", 
