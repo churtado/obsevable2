@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/tableau-0-7-1@4927
+// https://observablehq.com/@churtado/tableau-0-7-1@4944
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -131,8 +131,8 @@ vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json", 
   "hconcat": [
     {
-      "width": 200,
-      "height": 200,
+      "width": 270,
+      "height": 300,
       "data": { "values": customer_id_group_data  },
       "selection": {
         "brush": { "type": "interval"},
@@ -165,8 +165,8 @@ vega({
         }
     },
     {
-      "width": 200,
-      "height": 200,
+      "width": 270,
+      "height": 300,
       "data": { "values": customer_id_group_data  },
       "selection": {
         "grid": {
@@ -205,7 +205,7 @@ vega({
   "data": { "values": order_date_group_data },
   "vconcat": [
     {
-      "width": 800,
+      "width": 600,
       "height": 100,
       "mark": "area",
       "selection": {
@@ -227,8 +227,8 @@ vega({
       }
     },
     {
-      "width": 800,
-      "height": 50,
+      "width": 600,
+      "height": 300,
       "mark": "line",
       "encoding": {
         "x": {
@@ -256,7 +256,7 @@ vega({
 
   "vconcat": [
     {
-      "width": 200,
+      "width": 150,
       "height": 80,
       "transform": [
         {"filter": {"field": "category", "equal": "Furniture"}}
@@ -297,7 +297,7 @@ vega({
       }
     },
     {
-      "width": 200,
+      "width": 150,
       "height": 80,
       "transform": [
         {"filter": {"field": "category", "equal": "Technology"}}
@@ -338,7 +338,7 @@ vega({
       }
     },
     {
-      "width": 200,
+      "width": 150,
       "height": 140,
       "transform": [
         {"filter": {"field": "category", "equal": "Office Supplies"}}
@@ -387,8 +387,8 @@ vega({
 vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
   "description": "Line drawn between airports in the U.S. simulating a flight itinerary",
-  "width": 200,
-  "height": 200,
+  "width": 400,
+  "height": 340,
   "data": {
     "url": "https://raw.githubusercontent.com/churtado/vega-datasets/gh-pages/data/us-10m.json",
     "format": {
