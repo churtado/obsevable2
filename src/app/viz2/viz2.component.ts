@@ -1,5 +1,5 @@
-import { Runtime, Inspector } from "@observablehq/runtime";
-import { Component, OnInit, ViewChild, ElementRef, AfterContentInit } from '@angular/core';
+import { Runtime, Inspector } from '@observablehq/runtime';
+import { Component, OnInit, AfterContentInit } from '@angular/core';
 import notebook from '../../assets/observable/demo2';
 
 @Component({
@@ -18,64 +18,79 @@ export class Viz2Component implements OnInit, AfterContentInit {
   }
 
   ngAfterContentInit() {
-
     new Runtime().module(notebook, name => {
       switch (name) {
-        case 'viewof sales_slider': return new Inspector(document.querySelector("#sales_slider"));
-        case "viewof profit_slider": return new Inspector(document.querySelector("#profit_slider"));
-        
-        case "viewof map": return new Inspector(document.querySelector("#map"));
-        case "viewof barchart": return new Inspector(document.querySelector("#barchart"));
-        case "viewof scatterplot": return new Inspector(document.querySelector("#scatterplot"));
-        case "viewof linechart": return new Inspector(document.querySelector("#linechart"));
-        case "viewof linechart": return new Inspector(document.querySelector("#linechart"));
-        
-        case "barSelectionFurniture": return new Inspector(document.querySelector("#barSelectionFurniture"));
-        case "barSelectionTechnology": return new Inspector(document.querySelector("#barSelectionTechnology"));
-        case "barSelectionOfficeSupplies": return new Inspector(document.querySelector("#barSelectionOfficeSupplies"));
+        // input
+        case 'viewof button': return new Inspector(document.querySelector('#button'));
+        case 'viewof applyButton': return new Inspector(document.querySelector('#applyButton'));
+        case 'viewof sales_slider': return new Inspector(document.querySelector('#sales_slider'));
+        case 'viewof profit_slider': return new Inspector(document.querySelector('#profit_slider'));
+        case 'viewof start_date': return new Inspector(document.querySelector('#start_date'));
+        case 'viewof end_date': return new Inspector(document.querySelector('#end_date'));
 
-        case "stateSelection": return new Inspector(document.querySelector("#stateSelection"));
-        case "scatterLeftIntervalSelection": return new Inspector(document.querySelector("#scatterLeftIntervalSelection"));
-        case "lineSelection": return new Inspector(document.querySelector("#lineSelection"));
+        // charts
+        case 'viewof scatterplot': return new Inspector(document.querySelector('#scatterplot'));
+        case 'viewof linechart': return new Inspector(document.querySelector('#linechart'));
+        case 'viewof barchart': return new Inspector(document.querySelector('#barchart'));
+        case 'viewof map': return new Inspector(document.querySelector('#map'));
 
-        case "selected_subcategories": return new Inspector(document.querySelector("#selected_subcategories"));
-        case "selected_categories": return new Inspector(document.querySelector("#selected_categories"));
-        case "selected_regions": return new Inspector(document.querySelector("#selected_regions"));
+        // appendix
+        case 'createCrossfilter': return new Inspector(document.querySelector('#createCrossfilter'));
+        case 'filterState': return new Inspector(document.querySelector('#filterState'));
 
-        case "furnitureSelected": return new Inspector(document.querySelector("#furnitureSelected"));
-        case "furnitureRegions": return new Inspector(document.querySelector("#furnitureRegions"));
-        case "furnitureSubcategories": return new Inspector(document.querySelector("#furnitureSubcategories"));
+        // crossfilter
+        case 'catSubcatRegionCrossfilter': return new Inspector(document.querySelector('#catSubcatRegionCrossfilter'));
+        case 'customerIdCrossfilter': return new Inspector(document.querySelector('#customerIdCrossfilter'));
+        case 'orderDateCrossfilter': return new Inspector(document.querySelector('#orderDateCrossfilter'));
+        case 'orderDateOverviewCrossfilter': return new Inspector(document.querySelector('#orderDateOverviewCrossfilter'));
+        case 'stateIdCrossfilter': return new Inspector(document.querySelector('#stateIdCrossfilter'));
 
-        case "technologySelected": return new Inspector(document.querySelector("#technologySelected"));
-        case "technologyRegions": return new Inspector(document.querySelector("#technologyRegions"));
-        case "technologySubcategories": return new Inspector(document.querySelector("#technologySubcategories"));
+        // data
+        case 'cat_subcat_region_data': return new Inspector(document.querySelector('#cat_subcat_region_data'));
+        case 'customer_id_group_data': return new Inspector(document.querySelector('#customer_id_group_data'));
+        case 'order_date_group_data': return new Inspector(document.querySelector('#order_date_group_data'));
+        case 'order_date_group_data_overview': return new Inspector(document.querySelector('#order_date_group_data_overview'));
+        case 'state_id_date_group_data': return new Inspector(document.querySelector('#state_id_date_group_data'));
+        case 'superstore': return new Inspector(document.querySelector('#superstore'));
 
-        case "officeSuppliesSelected": return new Inspector(document.querySelector("#officeSuppliesSelected"));
-        case "officeSuppliesRegions": return new Inspector(document.querySelector("#officeSuppliesRegions"));
-        case "officeSuppliesSubcategories": return new Inspector(document.querySelector("#officeSuppliesSubcategories"));
+        // selections
+        case 'flag_furniture_selected': return new Inspector(document.querySelector('#flag_furniture_selected'));
+        case 'flag_office_supplies_selected': return new Inspector(document.querySelector('#flag_office_supplies_selected'));
+        case 'flag_technology_selected': return new Inspector(document.querySelector('#flag_technology_selected'));
+        case 'selected_categories': return new Inspector(document.querySelector('#selected_categories'));
+        case 'selected_categories_pre': return new Inspector(document.querySelector('#selected_categories_pre'));
+        case 'selected_customers': return new Inspector(document.querySelector('#selected_customers'));
+        case 'selected_customers_pre': return new Inspector(document.querySelector('#selected_customers_pre'));
+        case 'selected_dates': return new Inspector(document.querySelector('#selected_dates'));
+        case 'selected_date_range': return new Inspector(document.querySelector('#selected_date_range'));
+        case 'selected_dates_pre': return new Inspector(document.querySelector('#selected_dates_pre'));
+        case 'selected_regions_pre': return new Inspector(document.querySelector('#selected_regions_pre'));
+        case 'selected_regions': return new Inspector(document.querySelector('#selected_regions'));
+        case 'selected_regions_furniture': return new Inspector(document.querySelector('#selected_regions_furniture'));
+        case 'selected_regions_office_supplies': return new Inspector(document.querySelector('#selected_regions_office_supplies'));
+        case 'selected_regions_technology': return new Inspector(document.querySelector('#selected_regions_technology'));
+        case 'selected_state_ids': return new Inspector(document.querySelector('#selected_state_ids'));
+        case 'selected_state_ids_pre': return new Inspector(document.querySelector('#selected_state_ids_pre'));
+        case 'selected_subcategories': return new Inspector(document.querySelector('#selected_subcategories'));
+        case 'selected_subcategories_pre': return new Inspector(document.querySelector('#selected_subcategories_pre'));
+        case 'selected_subcategories_furniture': return new Inspector(document.querySelector('#selected_subcategories_furniture'));
+        case 'selected_subcategories_office_supplies': return new Inspector(document.querySelector('#selected_subcategories_office_supplies'));
+        case 'selected_subcategories_technology': return new Inspector(document.querySelector('#selected_subcategories_technology'));
 
-        case "selected_states": return new Inspector(document.querySelector("#selected_states"));
-        case "selected_customers_left": return new Inspector(document.querySelector("#selected_customers_left"));
-        case "selected_dates": return new Inspector(document.querySelector("#selected_dates"));
+        // signals
+        case 'signal_bar_furniture': return new Inspector(document.querySelector('#createSlider'));
+        case 'signal_bar_office_supplies': return new Inspector(document.querySelector('#createSlider'));
+        case 'signal_bar_technology': return new Inspector(document.querySelector('#createSlider'));
+        case 'signal_line': return new Inspector(document.querySelector('#createSlider'));
+        case 'signal_map': return new Inspector(document.querySelector('#createSlider'));
+        case 'signal_scatter': return new Inspector(document.querySelector('#createSlider'));
 
-        case "ss": return new Inspector(document.querySelector("#ss"));
-        case "createCrossfilter": return new Inspector(document.querySelector("#createCrossfilter"));
-        case "dataStructure": return new Inspector(document.querySelector("#dataStructure"));
-        case "filterGroupByDimensions": return new Inspector(document.querySelector("#filterGroupByDimensions"));
-
-        case "cat_subcat_region_view": return new Inspector(document.querySelector("#cat_subcat_region_view"));
-        case "customer_id_group_view_left": return new Inspector(document.querySelector("#customer_id_group_view_left"));
-        case "customer_id_group_view_right": return new Inspector(document.querySelector("#customer_id_group_view_right"));
-        case "state_group_view": return new Inspector(document.querySelector("#state_group_view"));
-        case "order_date_group_view": return new Inspector(document.querySelector("#order_date_group_view"));
-        
-        case "randomVar": return new Inspector(document.querySelector("#randomVar"));
-        case "updateRandomVar": return new Inspector(document.querySelector("#updateRandomVar"));
-
-        case "sliderCss": return new Inspector(document.querySelector("#sliderCss"));
-        case "createSlider": return new Inspector(document.querySelector("#createSlider"));
-        
-        
+        // utilities
+        case 'sliderCss': return new Inspector(document.querySelector('#sliderCss'));
+        case 'createSlider': return new Inspector(document.querySelector('#createSlider'));
+        case 'date': return new Inspector(document.querySelector('#date'));
+        case 'input': return new Inspector(document.querySelector('#input'));
+        case 'log': return new Inspector(document.querySelector('#log'));
       }
     });
   }
