@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/tableau-0-7-1@4948
+// https://observablehq.com/@churtado/tableau-0-7-1@5035
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -252,13 +252,16 @@ vega({
 })
 )});
   main.variable(observer("linechart")).define("linechart", ["Generators", "viewof linechart"], (G, _) => G.input(_));
-  main.variable(observer("viewof barchart")).define("viewof barchart", ["vega","cat_subcat_region_data"], function(vega,cat_subcat_region_data){return(
+  main.variable(observer("viewof barchart")).define("viewof barchart", ["vega","cat_subcat_region_data_furniture","cat_subcat_region_data_technology","cat_subcat_region_data_office_supplies"], function(vega,cat_subcat_region_data_furniture,cat_subcat_region_data_technology,cat_subcat_region_data_office_supplies){return(
 vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
-  "data": { "values": cat_subcat_region_data },
+  
 
   "vconcat": [
+    
+    
     {
+      "data": { "values": cat_subcat_region_data_furniture },
       "width": 150,
       "height": 80,
       "transform": [
@@ -276,7 +279,16 @@ vega({
       },
       "encoding": {
         "x": {"aggregate": "sum", "field": "sales", "type": "quantitative", "title": null},
-        "y": {"field": "subcategory", "type": "nominal", "sort": {"encoding": "x"}, "title": null},
+        "y": {
+          "field": "subcategory", 
+          "type": "nominal", 
+          "sort": {
+            "op": "sum", 
+            "field": "sales", 
+            "order" : "descending"
+          },
+          "title": null
+        },
         "fillOpacity": {
           "condition": {"selection": "Furniture", "value": 1},
           "value": 0.3
@@ -299,12 +311,13 @@ vega({
         "column": {"field": "region", "type": "nominal"}
       }
     },
+    
+    
+    
     {
+      "data": { "values": cat_subcat_region_data_technology  },
       "width": 150,
       "height": 80,
-      "transform": [
-        {"filter": {"field": "category", "equal": "Technology"}}
-      ],
       "selection": {
         "highlight": {"type": "single", "empty": "none", "on": "mouseover"},
         "Technology": {"type": "multi", "fields": ["subcategory", "region"]}
@@ -317,7 +330,15 @@ vega({
       },
       "encoding": {
         "x": {"aggregate": "sum", "field": "sales", "type": "quantitative", "title": null},
-        "y": {"field": "subcategory", "type": "nominal", "sort": {"encoding": "x"}},
+        "y": {
+          "field": "subcategory", 
+          "type": "nominal", 
+          "sort": {
+            "op": "sum", 
+            "field": "sales", 
+            "order" : "descending"
+          }
+        },
         "fillOpacity": {
           "condition": {"selection": "Technology", "value": 1},
           "value": 0.3
@@ -340,12 +361,13 @@ vega({
         "column": {"field": "region", "type": "nominal", "title": null, "header": {labelColor: "white"} }
       }
     },
+    
+    
+    
     {
+      "data": { "values": cat_subcat_region_data_office_supplies   },
       "width": 150,
       "height": 140,
-      "transform": [
-        {"filter": {"field": "category", "equal": "Office Supplies"}}
-      ],
       "selection": {
         "highlight": {"type": "single", "empty": "none", "on": "mouseover"},
         "Office_Supplies": {"type": "multi", "fields": ["subcategory", "region"]}
@@ -358,7 +380,16 @@ vega({
       },
       "encoding": {
         "x": {"aggregate": "sum", "field": "sales", "type": "quantitative"},
-        "y": {"field": "subcategory", "type": "nominal", "sort": {"encoding": "x"}, "title": null},
+        "y": {
+          "field": "subcategory", 
+          "type": "nominal", 
+          "sort": {
+            "op": "sum", 
+            "field": "sales", 
+            "order" : "descending"
+          },
+          "title": null
+        },
         "fillOpacity": {
           "condition": {"selection": "Office_Supplies", "value": 1},
           "value": 0.3
@@ -498,7 +529,7 @@ md`# Appendix`
   // filter for every dimension
   // generate the group and reduce it
   // map the output to whatever's desired
-  const getGroup = () => {
+  const getGroup = (filterFunction) => {
     
     debugger;
     
@@ -519,6 +550,12 @@ md`# Appendix`
     let reduced = group.reduce(reducers.reduceAdd, reducers.reduceRemove, reducers.reduceInitial);
     // apply the mapper to the reduced group
     let result = reduced.all().map(mapper);
+    
+    if(filterFunction !== undefined) {
+      debugger;
+      result = result.filter(filterFunction);
+    }
+    
     return result;
   }
   
@@ -561,7 +598,41 @@ md`# Appendix`
   main.variable(observer()).define(["md"], function(md){return(
 md`## Crossfilter`
 )});
-  main.variable(observer("catSubcatRegionCrossfilter")).define("catSubcatRegionCrossfilter", ["createCrossfilter","selected_customers","selected_dates","selected_state_ids"], function(createCrossfilter,selected_customers,selected_dates,selected_state_ids){return(
+  main.variable(observer("catSubcatRegionFurnitureCrossfilter")).define("catSubcatRegionFurnitureCrossfilter", ["createCrossfilter","selected_customers","selected_dates","selected_state_ids"], function(createCrossfilter,selected_customers,selected_dates,selected_state_ids){return(
+createCrossfilter(
+  "cat_subcat_region_dimension",
+  { 
+    customer_id: selected_customers,
+    order_date: selected_dates,
+    state_id: selected_state_ids,
+  },
+  ({key: k, value: {sales: s, profit: p} }) => {
+    let d = JSON.parse(k);
+    return { category: d.category, region: d.region, subcategory: d.subcategory, sales: s, profit: p};
+  },
+  (d) => { 
+    return JSON.stringify ( { category: d.category , subcategory: d.subcategory, region: d.region } ) ;
+  }
+)
+)});
+  main.variable(observer("catSubcatRegionOfficeSuppliesCrossfilter")).define("catSubcatRegionOfficeSuppliesCrossfilter", ["createCrossfilter","selected_customers","selected_dates","selected_state_ids"], function(createCrossfilter,selected_customers,selected_dates,selected_state_ids){return(
+createCrossfilter(
+  "cat_subcat_region_dimension",
+  { 
+    customer_id: selected_customers,
+    order_date: selected_dates,
+    state_id: selected_state_ids,
+  },
+  ({key: k, value: {sales: s, profit: p} }) => {
+    let d = JSON.parse(k);
+    return { category: d.category, region: d.region, subcategory: d.subcategory, sales: s, profit: p};
+  },
+  (d) => { 
+    return JSON.stringify ( { category: d.category , subcategory: d.subcategory, region: d.region } ) ;
+  }
+)
+)});
+  main.variable(observer("catSubcatRegionTechnologyCrossfilter")).define("catSubcatRegionTechnologyCrossfilter", ["createCrossfilter","selected_customers","selected_dates","selected_state_ids"], function(createCrossfilter,selected_customers,selected_dates,selected_state_ids){return(
 createCrossfilter(
   "cat_subcat_region_dimension",
   { 
@@ -626,8 +697,20 @@ createCrossfilter(
   main.variable(observer()).define(["md"], function(md){return(
 md`## Data`
 )});
-  main.variable(observer("cat_subcat_region_data")).define("cat_subcat_region_data", ["catSubcatRegionCrossfilter"], function(catSubcatRegionCrossfilter){return(
-catSubcatRegionCrossfilter.getGroup()
+  main.variable(observer("cat_subcat_region_data_furniture")).define("cat_subcat_region_data_furniture", ["catSubcatRegionFurnitureCrossfilter"], function(catSubcatRegionFurnitureCrossfilter){return(
+catSubcatRegionFurnitureCrossfilter.getGroup((e) => {
+  return e.category === "Furniture"
+})
+)});
+  main.variable(observer("cat_subcat_region_data_office_supplies")).define("cat_subcat_region_data_office_supplies", ["catSubcatRegionOfficeSuppliesCrossfilter"], function(catSubcatRegionOfficeSuppliesCrossfilter){return(
+catSubcatRegionOfficeSuppliesCrossfilter.getGroup((e) => {
+  return e.category === "Office Supplies"
+})
+)});
+  main.variable(observer("cat_subcat_region_data_technology")).define("cat_subcat_region_data_technology", ["catSubcatRegionTechnologyCrossfilter"], function(catSubcatRegionTechnologyCrossfilter){return(
+catSubcatRegionTechnologyCrossfilter.getGroup((e) => {
+  return e.category === "Technology"
+})
 )});
   main.variable(observer("customer_id_group_data")).define("customer_id_group_data", ["customerIdCrossfilter"], function(customerIdCrossfilter){return(
 customerIdCrossfilter.getGroup()
