@@ -1,8 +1,8 @@
-// https://observablehq.com/@churtado/tableau-0-7-1@5058
+// https://observablehq.com/@churtado/tableau-0-7-2@5093
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
-md`# Tableau 0.7.1`
+md`# Tableau 0.7.2`
 )});
   main.variable(observer()).define(["md"], function(md){return(
 md`## Input`
@@ -116,6 +116,9 @@ date({
 })
 )});
   main.variable(observer("start_date")).define("start_date", ["Generators", "viewof start_date"], (G, _) => G.input(_));
+  main.variable(observer()).define(["start_date"], function(start_date){return(
+start_date
+)});
   main.variable(observer("viewof end_date")).define("viewof end_date", ["date"], function(date){return(
 date({
   title: "End date", 
@@ -198,13 +201,14 @@ vega({
 })
 )});
   main.variable(observer("scatterplot")).define("scatterplot", ["Generators", "viewof scatterplot"], (G, _) => G.input(_));
-  main.variable(observer("viewof linechart")).define("viewof linechart", ["vega","order_date_group_data"], function(vega,order_date_group_data){return(
+  main.variable(observer("viewof linechart")).define("viewof linechart", ["vega","order_date_group_data","order_date_group_data_detail"], function(vega,order_date_group_data,order_date_group_data_detail){return(
 vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
   
-  "data": { "values": order_date_group_data },
+  
   "vconcat": [
     {
+      "data": { "values": order_date_group_data },
       "width": 600,
       "height": 100,
       "mark": "area",
@@ -227,6 +231,7 @@ vega({
       }
     },
     {
+      "data": { "values": order_date_group_data_detail  },
       "width": 600,
       "height": 300,
       "mark": {
@@ -252,6 +257,33 @@ vega({
 })
 )});
   main.variable(observer("linechart")).define("linechart", ["Generators", "viewof linechart"], (G, _) => G.input(_));
+  main.variable(observer("order_date_group_data_detail")).define("order_date_group_data_detail", ["orderDateCrossfilter","start_date","moment","end_date"], function(orderDateCrossfilter,start_date,moment,end_date){return(
+orderDateCrossfilter.getGroup(e => {
+  
+  let sd, ed = 0
+  debugger;
+  if(start_date !== "") {
+    sd = moment(start_date).unix() * 1000;
+  } else {
+    sd = 0;
+    sd = orderDateCrossfilter.allMembers.map(e => e.order_date)
+      .reduce((min, date) => {
+          return date <= min ? date : min;
+      });
+  }
+  
+  if(end_date !== "") {
+    ed = moment(end_date).unix() * 1000;
+  } else {
+    ed = orderDateCrossfilter.allMembers.map(e => e.order_date)
+      .reduce((max, date) => {
+          return date >= max ? date : max;
+      });
+  }
+  
+  return e.order_date >= sd && e.order_date <= ed;
+})
+)});
   main.variable(observer("viewof barchart")).define("viewof barchart", ["vega","cat_subcat_region_data_furniture","cat_subcat_region_data_technology","cat_subcat_region_data_office_supplies"], function(vega,cat_subcat_region_data_furniture,cat_subcat_region_data_technology,cat_subcat_region_data_office_supplies){return(
 vega({
   "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
