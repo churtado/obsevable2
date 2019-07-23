@@ -1,4 +1,4 @@
-// https://observablehq.com/@churtado/tableau-0-7-1@5035
+// https://observablehq.com/@churtado/tableau-0-7-1@5058
 export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], function(md){return(
@@ -262,6 +262,9 @@ vega({
     
     {
       "data": { "values": cat_subcat_region_data_furniture },
+      "transform": [
+        {"filter": {"field": "category", "equal": "Furniture"}}
+      ],
       "width": 150,
       "height": 80,
       "transform": [
@@ -282,11 +285,6 @@ vega({
         "y": {
           "field": "subcategory", 
           "type": "nominal", 
-          "sort": {
-            "op": "sum", 
-            "field": "sales", 
-            "order" : "descending"
-          },
           "title": null
         },
         "fillOpacity": {
@@ -332,12 +330,7 @@ vega({
         "x": {"aggregate": "sum", "field": "sales", "type": "quantitative", "title": null},
         "y": {
           "field": "subcategory", 
-          "type": "nominal", 
-          "sort": {
-            "op": "sum", 
-            "field": "sales", 
-            "order" : "descending"
-          }
+          "type": "nominal"
         },
         "fillOpacity": {
           "condition": {"selection": "Technology", "value": 1},
@@ -383,11 +376,6 @@ vega({
         "y": {
           "field": "subcategory", 
           "type": "nominal", 
-          "sort": {
-            "op": "sum", 
-            "field": "sales", 
-            "order" : "descending"
-          },
           "title": null
         },
         "fillOpacity": {
